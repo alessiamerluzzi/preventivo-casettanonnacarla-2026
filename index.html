@@ -1,0 +1,1171 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventivo "Casetta Nonna Carla"</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 18px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .price-breakdown {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-radius: 4px;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .price-total {
+            font-weight: bold;
+            border-top: 1px solid #bbd8f1;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            background-color: #f0f0f0;
+        }
+        .calendar-day {
+            padding: 10px 5px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #f0f0f0;
+        }
+        .calendar-day.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        .calendar-day.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+      
+      .calendar-day.offseason {
+    background-color: #eef3f7; /* simile al prenotabile, ma più spento */
+    color: #666;
+    cursor: pointer;
+}
+.calendar-day.offseason:hover {
+    background-color: #d9e6f0;
+}
+
+      
+        .calendar-day .price {
+            font-size: 10px;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: #666;
+        }
+      .calendar-day.empty {
+    background-color: transparent;
+    border: none;
+    cursor: default;
+}
+        .selected .price {
+            color: #e0e0e0;
+        }
+        .form-row {
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .options-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .option-item label {
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
+        .option-item input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
+        .option-price {
+            margin-left: auto;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        /* Stile per la sezione contatti */
+        .contact-section {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f0f7fb;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .contact-text {
+            line-height: 1.6;
+        }
+        .email {
+            font-weight: bold;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Preventivo "Casetta Nonna Carla"</h1>
+        <p align="center">
+  <small>Per ulteriori info visita il <a href="https://sites.google.com/view/casettanonnacarla?usp=sharing" target="_blank">nostro sito.</a></small>
+</p>
+        
+        <div class="form-row">
+            <label for="month-select">Seleziona mese:</label>
+           <select id="month-select">
+    <option value="4-2025">Maggio 2025</option>
+    <option value="5-2025">Giugno 2025</option>
+    <option value="6-2025">Luglio 2025</option>
+    <option value="7-2025">Agosto 2025</option>
+    <option value="8-2025">Settembre 2025</option>
+    <option value="9-2025">Ottobre 2025</option>
+    <option value="10-2025">Novembre 2025</option>
+    <option value="11-2025">Dicembre 2025</option>
+    <option value="0-2026">Gennaio 2026</option>
+    <option value="1-2026">Febbraio 2026</option>
+    <option value="2-2026">Marzo 2026</option>
+    <option value="3-2026">Aprile 2026</option>
+</select>
+
+        </div>
+
+        <div id="calendar-container">
+            <div class="calendar" id="calendar"></div>
+        </div>
+        
+       <p><small>Se il calendario non consente di selezionare una data, significa che <strong> la data è già stata prenotata </strong> e, dunque, <strong> non è più disponibile</strong>. <strong>Non si accettano prenotazioni di una durata inferiore a 4 notti.</strong></small> 
+           
+        <div class="form-row">
+            <label>Date selezionate: <span id="selected-dates">Nessuna data selezionata</span></label>
+            <div class="info-box" style="margin-top: 5px; font-size: 0.9em;">
+                Seleziona solo due date: la prima per il check-in e la seconda per il check-out.
+                Il check-in avviene dalle ore 15:00 alle ore 20:00 e il check-out dalle ore 8:00 alle ore 10:00.
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label>Notti: <span id="nights-count">0</span></label>
+        </div>
+        
+        <h2>Biancheria</h2>
+        <div class="info-box">
+            La biancheria del letto e del bagno non è inclusa nel preventivo calcolato: può essere noleggiata o portata da casa. 
+            Ogni kit include: 1 asciugamano grande e 2 piccoli, lenzuolo sotto, lenzuolo sopra e federe.  <p> <small>Per decidere di quali kit hai bisogno, visita <a href="https://sites.google.com/view/casettanonnacarla/galleria?authuser=0">il nostro sito e scopri come sono ripartiti i posti letto.</a></small>
+</p>
+        </div>
+        
+        <div class="options-section">
+            <div class="option-item">
+                <label for="kit-matrimoniale">Kit Matrimoniale:</label>
+                <input type="number" id="kit-matrimoniale" min="0" max="1" value="0">
+                <span class="option-price">25 € / kit</span>
+            </div>
+            <div class="option-item">
+                <label for="kit-singolo">Kit Singolo:</label>
+                <input type="number" id="kit-singolo" min="0" max="2" value="0">
+                <span class="option-price">20 € / kit</span>
+            </div>
+        </div>
+        
+        <button id="calculate-btn" disabled>Calcola Preventivo</button>
+        
+        <div id="result"></div>
+       
+<h2></h2>
+ <div class="form-hint warning">
+<p>Il prezzo non include la <strong>tassa di soggiorno</strong>, che deve essere pagata in loco al momento dell'arrivo. Nelle date comprese fra 1 aprile e 15 giugno e poi nelle date comprese fra 16 settembre e 30 settembre la tassa di soggiorno è di 0,50€. Nelle date comprese fra il 16 giugno e il 15 settembre la tassa di soggiorno è di 1€. La tassa di soggiorno deve essere pagata solo dalle persone che hanno compiuto 16 anni. <strong> <a href="https://alessiamerluzzi.github.io/tassasoggiorno-follonica/" target="_blank">Calcola la tassa di soggiorno </a></strong></p>
+</div>
+ 
+      
+
+<!-- Modifica sezione contatti -->
+<h2>Contatti</h2>
+<div class="contact-section">
+     <div class="form-hint warning">
+        <p><strong>Attenzione!</strong> Compilare il form <strong>non corrisponde ad aver ultimato la prenotazione</strong>. Una volta inviata la richiesta di prenotazione, otterrai una risposta con il <a href="https://drive.google.com/file/d/1F3s1EmPZ9z5bojuc5EUSRZLn0rb4Qyhp/view?usp=sharing" target="_blank">contratto di locazione transitoria a fini turistici</a> da firmare. Solo a quel punto la prenotazione potrà dirsi ultimata.</p>
+    </div>
+    
+    <form id="contact-form" class="contact-form">
+        <div class="form-row">
+            <label for="full-name">Nome e Cognome: <span class="required">*</span></label>
+            <input type="text" id="full-name" name="full-name" required>
+        </div>
+        
+        <div class="form-row">
+            <label for="guests">Numero di ospiti: <span class="required">*</span></label>
+            <input type="number" id="guests" name="guests" min="1" max="4" value="1" required>
+            <div class="form-hint">Massimo 4 ospiti</div>
+        </div>
+        
+        <div class="form-row">
+            <label for="pets">Animali domestici:</label>
+            <input type="number" id="pets" name="pets" min="0" max="2" value="0">
+            <div class="form-hint">Massimo 2 animali.  Per il secondo animale è richiesta una tariffa aggiuntiva di 2€ al giorno. <b>La tariffa non è calcolata nel prezzo del preventivo.</b></div>
+        </div>
+        
+        <div class="form-row period-selection">
+            <label for="period">Periodo del soggiorno: <span class="required">*</span></label>
+            <div class="period-input-container">
+                <input type="text" id="period" name="period" readonly required>
+                <button type="button" id="open-calendar-btn" class="calendar-btn">Seleziona date</button>
+            </div>
+            <div class="form-hint calendar-hint">Le date possono essere selezionate <strong> solamente tramite il calendario principale</strong>. Se una data non è selezionabile, significa che è già stata prenotata.</div>
+        </div>
+        
+        <div class="form-row">
+            <label for="other">Altro:</label>
+            <textarea id="other" name="other" rows="4"></textarea>
+        </div>
+        
+        <div class="form-hint warning">
+    <p><strong>IMPORTANTE:</strong> Prima di inviare la richiesta di prenotazione è <strong>OBBLIGATORIO calcolare il preventivo</strong> utilizzando il calcolatore nella parte superiore della pagina.</p>
+    <p>Non è possibile inviare la richiesta senza aver selezionato le date nel calendario principale e senza aver calcolato il preventivo con successo. Se una data non è selezionabile attraverso il calendario principale significa che <strong>è già stata prenotata</strong> e, dunque, <strong>è impossibile prenotarla di nuovo</strong>.</p>
+    <p><strong>Ricorda</strong>: non si accettano prenotazioni di durata inferiore a 4 notti. Se il calcolatore non ha fornito un preventivo, vuol dire che il soggiorno selezionato è più breve di 4 notti e dunque non sarà accettato.</p>
+</div>
+        
+        <div class="form-row">
+            <button type="submit" id="submit-form" class="submit-btn disabled-btn" disabled>Invia Richiesta</button>
+        </div>
+    </form>
+
+</div>
+
+<!-- CSS aggiuntivo -->
+<style>
+    .info-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-left: 4px solid #ffc107;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .info-warning a {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+    
+    .info-warning a:hover {
+        text-decoration: none;
+    }
+    
+    .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-row {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-row label {
+        margin-bottom: 5px;
+    }
+    
+    .form-row input,
+    .form-row textarea {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    /* Stile per il campo periodo in sola lettura */
+    .form-row input#period {
+        background-color: #f9f9f9;
+        cursor: not-allowed;
+    }
+    
+    /* Stile per il contenitore del periodo */
+    .period-input-container {
+        display: flex;
+        gap: 10px;
+    }
+    
+    /* Stile per il pulsante del calendario */
+    .calendar-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    
+    .calendar-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .calendar-hint {
+        color: #e74c3c;
+        font-weight: 500;
+    }
+    
+    .form-hint {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 3px;
+    }
+    
+    .required {
+        color: #e74c3c;
+    }
+    
+    .submit-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        margin-top: 10px;
+        align-self: flex-start;
+    }
+    
+    .submit-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    /* Stile per il pulsante disabilitato */
+    .submit-btn.disabled-btn {
+        background-color: #ccc;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    
+    .submit-btn.disabled-btn:hover {
+        background-color: #ccc;
+    }
+    
+    .form-hint.warning {
+        background-color: #f8f4e5;
+        color: #856404;
+        padding: 10px;
+        border-left: 3px solid #ffc107;
+        font-weight: 500;
+    }
+    
+</style>
+
+<!-- JavaScript per l'invio del form e gestione del calendario -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleziona il form di contatto e altri elementi
+        const contactForm = document.getElementById('contact-form');
+        const formResult = document.getElementById('form-result');
+        const periodInput = document.getElementById('period');
+        const openCalendarBtn = document.getElementById('open-calendar-btn');
+        const submitBtn = document.getElementById('submit-form');
+        
+        // Riferimento al calendario (potrebbe essere necessario adattarlo in base alla struttura del sito)
+        const calendarSection = document.querySelector('.booking-section') || document.getElementById('calendar-section');
+        
+        // Funzione per verificare se è possibile inviare il form
+function checkFormValidity() {
+    const fullName = document.getElementById('full-name').value.trim();
+    const guests = document.getElementById('guests').value;
+    const period = periodInput.value.trim();
+    const resultElement = document.getElementById('result');
+    
+    // Controlla se i campi obbligatori sono compilati
+    const hasRequiredFields = fullName !== '' && guests !== '' && period !== '';
+    
+    // Controlla se il preventivo è stato calcolato CON SUCCESSO
+    const hasCalculatedQuote = resultElement && 
+                              resultElement.style.display !== 'none' && 
+                              resultElement.classList.contains('success');
+    
+    // Il form è valido solo se tutti i campi sono compilati E il preventivo è stato calcolato
+    const isValid = hasRequiredFields && hasCalculatedQuote;
+    
+    // Abilita o disabilita il pulsante di invio
+    submitBtn.disabled = !isValid;
+    
+    // Aggiungi o rimuovi classe visuale per il pulsante disabilitato
+    if (isValid) {
+        submitBtn.classList.remove('disabled-btn');
+    } else {
+        submitBtn.classList.add('disabled-btn');
+    }
+    
+    return isValid;
+}
+        
+        // Esegui il controllo iniziale della validità
+        checkFormValidity();
+        
+        // Aggiungi event listener per tutti i campi obbligatori per verificare la validità
+        document.getElementById('full-name').addEventListener('input', checkFormValidity);
+        document.getElementById('guests').addEventListener('input', checkFormValidity);
+        periodInput.addEventListener('change', checkFormValidity);
+        
+        // Impedisci qualsiasi tentativo di modifica del campo periodo
+        periodInput.addEventListener('focus', function(e) {
+            // Mostra un messaggio o sposta il focus al pulsante del calendario
+            openCalendarBtn.focus();
+            
+            // Se il campo periodo è vuoto, mostra un messaggio e scorre al calendario
+            if (!periodInput.value.trim()) {
+                alert('Per favore, seleziona le date del soggiorno utilizzando il calendario principale.');
+                if (calendarSection) {
+                    calendarSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+        
+        // Implementa il pulsante per aprire il calendario
+        openCalendarBtn.addEventListener('click', function() {
+            // Scorrere alla sezione del calendario
+            if (calendarSection) {
+                calendarSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Se non riesci a trovare il calendario, mostra un messaggio
+                alert('Per favore, utilizza il calendario principale nella parte superiore della pagina per selezionare le date del soggiorno.');
+            }
+        });
+        
+        // Prevenire l'inserimento manuale con un avviso
+        periodInput.addEventListener('keydown', function(e) {
+            e.preventDefault();
+            alert('Per favore, utilizza il calendario principale per selezionare le date del soggiorno.');
+        });
+        
+        // Aggiungi l'evento di submit al form
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Verifica nuovamente la validità prima di procedere
+if (!checkFormValidity()) {
+    const hasRequiredFields = document.getElementById('full-name').value.trim() !== '' && 
+                             document.getElementById('guests').value !== '' && 
+                             periodInput.value.trim() !== '';
+    
+    const resultElement = document.getElementById('result');
+    const hasCalculatedQuote = resultElement && 
+                              resultElement.style.display !== 'none' && 
+                              resultElement.classList.contains('success');
+    
+    let errorMessage = '';
+    
+    if (!hasRequiredFields) {
+        errorMessage = 'Per favore, compila tutti i campi obbligatori.';
+        
+        // Evidenzia specificamente se il periodo non è selezionato
+        if (!periodInput.value.trim()) {
+            errorMessage += ' È necessario selezionare un periodo di soggiorno utilizzando il calendario principale.';
+        }
+    } else if (!hasCalculatedQuote) {
+        errorMessage = 'È OBBLIGATORIO calcolare il preventivo prima di inviare la richiesta di prenotazione. Utilizza il calcolatore nella parte superiore della pagina e clicca "Calcola Preventivo".';
+    }
+    
+    formResult.innerHTML = errorMessage;
+    formResult.className = 'form-result error-message';
+    formResult.style.display = 'block';
+    
+    // Se non è stato calcolato il preventivo, scorri verso il calcolatore
+    if (!hasCalculatedQuote && calendarSection) {
+        calendarSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    return;
+}
+            
+            // Raccogli i dati dal form
+            const fullName = document.getElementById('full-name').value;
+            const guests = document.getElementById('guests').value;
+            const pets = document.getElementById('pets').value;
+            const period = periodInput.value;
+            const other = document.getElementById('other').value;
+            
+            // Ottieni il contenuto dettagliato del preventivo
+            let preventivoDettagliato = "Nessun preventivo calcolato";
+            const resultElement = document.getElementById('result');
+            
+            if (resultElement && resultElement.style.display !== 'none') {
+                // Inizia a costruire il preventivo dettagliato
+                let dettagliPreventivo = [];
+                
+                // Verifica se c'è un elemento di successo (che contiene il preventivo)
+                const successElement = resultElement.querySelector('.success');
+                if (successElement) {
+                    // Estrai il periodo e il numero di notti
+                    const periodoText = successElement.querySelector('p')?.textContent || '';
+                    if (periodoText) {
+                        dettagliPreventivo.push(periodoText);
+                    }
+                    
+                    // 1. Estrai le singole notti dalla classe price-item (escludendo il totale e altri elementi speciali)
+                    const priceItems = resultElement.querySelectorAll('.price-item:not(.price-total)');
+                    if (priceItems && priceItems.length > 0) {
+                        priceItems.forEach(item => {
+                            const itemText = item.textContent.trim().replace(/\s+/g, ' ');
+                            
+                            // Verifica se è un elemento di notte, spese pulizia o kit biancheria
+                            if (itemText.includes('Notte') || 
+                                itemText.includes('Spese di pulizia') || 
+                                itemText.includes('Kit Biancheria')) {
+                                dettagliPreventivo.push(itemText);
+                            }
+                        });
+                    }
+                    
+                    // Estrai il prezzo totale
+                    const priceTotalElement = resultElement.querySelector('.price-total');
+                    if (priceTotalElement) {
+                        dettagliPreventivo.push(priceTotalElement.textContent.trim().replace(/\s+/g, ' '));
+                    }
+                }
+                
+                // Se abbiamo trovato dettagli, li usiamo; altrimenti facciamo fallback sul testo completo
+                if (dettagliPreventivo.length > 0) {
+                    preventivoDettagliato = dettagliPreventivo.join("%0D%0A");
+                } else {
+                    // Fallback: prendi tutto il contenuto testuale del preventivo
+                    preventivoDettagliato = "Preventivo:%0D%0A" + resultElement.textContent.trim()
+                        .replace(/\s+/g, ' ')
+                        .split('.').join("%0D%0A");
+                }
+            }
+            
+            // Prepara i dati per l'email con il preventivo dettagliato
+            const mailtoLink = `mailto:merluzzialessia@gmail.com?subject=Richiesta Prenotazione Casa Vacanze&body=Nome e Cognome: ${encodeURIComponent(fullName)}%0D%0ANumero di ospiti: ${encodeURIComponent(guests)}%0D%0AAnimali domestici: ${encodeURIComponent(pets)}%0D%0APeriodo del soggiorno: ${encodeURIComponent(period)}%0D%0A%0D%0APREVENTIVO DETTAGLIATO:%0D%0A${preventivoDettagliato}%0D%0A%0D%0AAltro: ${encodeURIComponent(other)}`;
+            
+            // Apri il client di posta predefinito
+window.location.href = mailtoLink;
+
+            // Verifica se ci sono animali domestici
+const hasPets = parseInt(pets) > 0;
+
+// Reindirizza alla pagina di ringraziamento dopo un breve delay
+setTimeout(function() {
+    // Determina il messaggio aggiuntivo per chi ha animali domestici
+    const additionalMessage = hasPets ? `
+        <div style="
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: left;
+        ">
+            <h3 style="margin-top: 0; color: #856404;">Hai animali domestici?</h3>
+            <p style="margin-bottom: 0; line-height: 1.6;">
+                <small>Ricordati di leggere le regole per il loro accesso alla spiaggia. Le regole rimangono le stesse ogni anno ma vengono comunque ripubblicate di giugno in giugno. Clicca <a href="https://www.comune.follonica.gr.it/Novita/Notizie/Accesso-dei-cani-sulla-spiaggia-cosa-fare" target="_blank">qui</a> per leggere le ultime direttive pubblicate.</small>
+            </p>
+        </div>
+    ` : '';
+
+    // Crea la pagina di ringraziamento e reindirizza
+    document.body.innerHTML = `
+        <div style="
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            background-color: #f5f5f5;
+        ">
+            <div style="
+                background-color: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            ">
+                <h1 style="color: #2c3e50; margin-bottom: 20px;">Stai inviando la tua richiesta!</h1>
+                <p style="font-size: 18px; color: #2c3e50; line-height: 1.6;">
+                    Grazie di aver scelto la nostra casetta! Si aprirà il tuo client email per completare l'invio.
+                </p>
+                ${additionalMessage}
+            </div>
+        </div>
+    `;
+}, 500);
+        });
+        
+        // Aggiungi validazione per i campi numerici
+        const guestsInput = document.getElementById('guests');
+        guestsInput.addEventListener('change', function() {
+            if (this.value < 1) this.value = 1;
+            if (this.value > 4) this.value = 4;
+            checkFormValidity();
+        });
+        
+        const petsInput = document.getElementById('pets');
+        petsInput.addEventListener('change', function() {
+            if (this.value < 0) this.value = 0;
+            if (this.value > 2) this.value = 2;
+        });
+        
+        // Migliora la sincronizzazione con il calendario principale
+        const selectedDatesElement = document.getElementById('selected-dates');
+        
+        if (selectedDatesElement) {
+            // Imposta immediatamente il valore se esiste già
+            if (selectedDatesElement.textContent && selectedDatesElement.textContent !== 'Nessuna data selezionata') {
+                periodInput.value = selectedDatesElement.textContent;
+                checkFormValidity(); // Controlla la validità dopo l'impostazione
+            }
+            
+            // Osserva il contenuto dell'elemento delle date selezionate
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    // Se il contenuto non è "Nessuna data selezionata", copialo nel campo del periodo
+                    const newContent = selectedDatesElement.textContent;
+                    if (newContent && newContent !== 'Nessuna data selezionata') {
+                        periodInput.value = newContent;
+                    } else {
+                        periodInput.value = '';
+                    }
+
+// Observer per monitorare quando viene calcolato il preventivo
+const resultElement = document.getElementById('result');
+if (resultElement) {
+    const resultObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            // Controlla la validità del form ogni volta che cambia il risultato del preventivo
+            checkFormValidity();
+        });
+    });
+    
+    // Monitora i cambiamenti nel div del risultato
+    resultObserver.observe(resultElement, { 
+        childList: true, 
+        characterData: true, 
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+    });
+}
+                    
+                    // Controlla la validità del form dopo ogni modifica
+                    checkFormValidity();
+                });
+            });
+            
+            // Configura l'osservatore per monitorare tutti i possibili cambiamenti
+            observer.observe(selectedDatesElement, { 
+                childList: true, 
+                characterData: true, 
+                subtree: true,
+                attributes: true,
+                attributeOldValue: true 
+            });
+        }
+    });
+</script>
+        
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definizione delle tariffe
+            const rates = [
+                { start: new Date(2025, 4, 1), end: new Date(2025, 4, 16), price: 140 }, // 1-16 maggio
+                { start: new Date(2025, 4, 17), end: new Date(2025, 4, 31), price: 150 }, // 17-31 maggio
+                { start: new Date(2025, 5, 1), end: new Date(2025, 5, 15), price: 155 },  // 1-15 giugno
+                { start: new Date(2025, 5, 16), end: new Date(2025, 5, 30), price: 160 }, // 16-30 giugno
+                { start: new Date(2025, 6, 1), end: new Date(2025, 6, 15), price: 170 },  // 1-15 luglio
+                { start: new Date(2025, 6, 16), end: new Date(2025, 6, 31), price: 175 }, // 16-31 luglio
+                { start: new Date(2025, 7, 1), end: new Date(2025, 7, 8), price: 180 },   // 1-8 agosto
+                { start: new Date(2025, 7, 9), end: new Date(2025, 7, 23), price: 185 },  // 9-23 agosto
+                { start: new Date(2025, 7, 24), end: new Date(2025, 7, 31), price: 170 }, // 24-31 agosto
+                { start: new Date(2025, 8, 1), end: new Date(2025, 8, 15), price: 155 },  // 1-15 settembre
+                { start: new Date(2025, 8, 16), end: new Date(2025, 8, 30), price: 150 }, // 16-30 settembre
+                { start: new Date(2025, 9, 1), end: new Date(2025, 9, 31), price: 130 }   // 1-31 ottobre
+            ];
+          
+           const nonBookableDates = [
+                { start: new Date(2025, 4, 22), end: new Date(2025, 8, 14) },   // 22 maggio-14 settembre
+                { start: new Date(2025, 8, 22), end: new Date(2025, 8, 28) }, // 22-28 settembre
+                // Aggiungi altri periodi non prenotabili secondo necessità
+            ];
+
+
+            const cleaningFee = 60;
+            const minNights = 4;
+            const kitMatrimonialePrice = 25;
+            const kitSingoloPrice = 20;
+            
+            let selectedDates = [];
+            const calendarElement = document.getElementById('calendar');
+            const monthSelect = document.getElementById('month-select');
+            const selectedDatesElement = document.getElementById('selected-dates');
+            const nightsCountElement = document.getElementById('nights-count');
+            const calculateButton = document.getElementById('calculate-btn');
+            const resultElement = document.getElementById('result');
+            const kitMatrimonialeInput = document.getElementById('kit-matrimoniale');
+            const kitSingoloInput = document.getElementById('kit-singolo');
+            
+            // Limita i valori di input per i kit
+            kitMatrimonialeInput.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+                if (this.value > 1) this.value = 1;
+            });
+            
+            kitSingoloInput.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+                if (this.value > 2) this.value = 2;
+            });
+            
+            // Genera i nomi dei giorni della settimana
+            const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+            weekdays.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-header';
+                dayElement.textContent = day;
+                calendarElement.appendChild(dayElement);
+            });
+            
+            // Funzione per verificare se una data è prenotabile
+            function isBookableDate(date) {
+                // Clona la data per evitare modifiche all'oggetto originale
+                const dateToCheck = new Date(date);
+                
+                // Prima controlla se la data è specificamente non prenotabile
+                for (const nonBookablePeriod of nonBookableDates) {
+                    // Se la data è uguale all'ultima data del periodo non prenotabile (check-out),
+                    // è prenotabile perché il check-out avviene la mattina
+                    if (dateToCheck.getTime() === nonBookablePeriod.end.getTime()) {
+                        continue; // Salta questo controllo, la data è prenotabile per check-in
+                    }
+                    
+                    // Se la data è uguale alla prima data del periodo non prenotabile (check-in),
+                    // è prenotabile come data di check-out perché il check-in avviene nel pomeriggio
+                    if (dateToCheck.getTime() === nonBookablePeriod.start.getTime()) {
+                        continue; // Salta questo controllo, la data è prenotabile per check-out
+                    }
+                    
+                    // Altrimenti verifica se la data è all'interno del periodo non prenotabile
+                    if (dateToCheck > nonBookablePeriod.start && dateToCheck < nonBookablePeriod.end) {
+                        return false; // Data non prenotabile
+                    }
+                }
+                
+                // Poi verifica se la data è in un periodo con tariffa
+                for (const rate of rates) {
+                    if (dateToCheck >= rate.start && dateToCheck <= rate.end) {
+                        return true; // Data prenotabile
+                    }
+                }
+                
+                return false; // Data fuori dai periodi definiti
+            }
+            
+            // Funzione per ottenere il prezzo di una data
+            function getDatePrice(date) {
+                for (const rate of rates) {
+                    if (date >= rate.start && date <= rate.end) {
+                        return rate.price;
+                    }
+                }
+                return null;
+            }
+            
+            // Funzione per formattare una data
+            function formatDate(date) {
+                return date.toLocaleDateString('it-IT', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+            
+            // Funzione per aggiornare il calendario
+function updateCalendar() {
+    // Rimuovi tutti i giorni esistenti
+    const dayElements = document.querySelectorAll('.calendar-day');
+    dayElements.forEach(el => el.remove());
+
+    // Ottieni mese e anno dal select (formato "mese-anno")
+    let parts = monthSelect.value.split('-');
+    let selectedMonth = parseInt(parts[0], 10);
+    let year = parseInt(parts[1], 10);
+
+    if (isNaN(selectedMonth) || isNaN(year)) {
+        console.error("Errore: valore del select non valido:", monthSelect.value);
+        return;
+    }
+
+    // Crea la data del primo giorno del mese
+    const firstDay = new Date(year, selectedMonth, 1);
+
+    // Trova il primo giorno della settimana (0 = Domenica, 1 = Lunedì, ecc.)
+    let dayOfWeek = firstDay.getDay() || 7; // Converte 0 (domenica) a 7
+    dayOfWeek = dayOfWeek - 1; // Adatta a lunedì = 0
+
+    // Aggiungi celle vuote prima del primo giorno del mese
+    for (let i = 0; i < dayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        emptyCell.style.visibility = 'hidden';
+        calendarElement.appendChild(emptyCell);
+    }
+
+    // Calcola il numero di giorni nel mese
+    const lastDay = new Date(year, selectedMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+    // Definisci periodo off-season (1 nov 2025 – 30 apr 2026)
+    const offSeasonStart = new Date(2025, 10, 1); // 1 nov 2025
+    const offSeasonEnd = new Date(2026, 3, 30);   // 30 apr 2026
+
+    // Aggiungi tutti i giorni del mese
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, selectedMonth, day);
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+
+        // Verifica se la data è prenotabile
+        const isBookable = isBookableDate(date);
+        const price = getDatePrice(date);
+
+        if (price && isBookable) {
+            // Normale: prenotabile
+            const priceElement = document.createElement('span');
+            priceElement.className = 'price';
+            priceElement.textContent = `${price}€`;
+            dayElement.appendChild(priceElement);
+            dayElement.addEventListener('click', () => toggleDateSelection(date));
+        } else if (date >= offSeasonStart && date <= offSeasonEnd) {
+            // Fuori stagione: cliccabile ma con popup
+            dayElement.classList.add('offseason');
+            dayElement.addEventListener('click', () => {
+                alert("La struttura accetta prenotazioni solo nel periodo fra maggio e ottobre: essendo una casa sulla spiaggia, non possiamo garantire un soggiorno di qualità nel resto dell'anno. Nuove disponibilità e prezzi per la stagione estiva 2026 saranno aggiornate fra dicembre 2025 e gennaio 2026.");
+            });
+        } else {
+            // Realmente non prenotabile
+            dayElement.classList.add('disabled');
+            dayElement.title = 'Data non prenotabile';
+        }
+
+        // Evidenzia se la data è selezionata
+        if (isDateSelected(date)) {
+            dayElement.classList.add('selected');
+        }
+
+        calendarElement.appendChild(dayElement);
+    }
+}
+
+            
+            // Funzione per verificare se una data è selezionata
+            function isDateSelected(date) {
+                return selectedDates.some(selectedDate => 
+                    selectedDate.getDate() === date.getDate() && 
+                    selectedDate.getMonth() === date.getMonth() && 
+                    selectedDate.getFullYear() === date.getFullYear()
+                );
+            }
+            
+            // Funzione per gestire la selezione/deselezione delle date
+            function toggleDateSelection(date) {
+                const dateIndex = selectedDates.findIndex(selectedDate => 
+                    selectedDate.getDate() === date.getDate() && 
+                    selectedDate.getMonth() === date.getMonth() && 
+                    selectedDate.getFullYear() === date.getFullYear()
+                );
+                
+                if (dateIndex === -1) {
+                    // Verifica se già ci sono due date selezionate
+                    if (selectedDates.length >= 2) {
+                        // Se ci sono già due date, rimuovi la vecchia selezione
+                        selectedDates = [];
+                        // Aggiungi la nuova data
+                        selectedDates.push(date);
+                        
+                           } else {
+            // Selezione della seconda data: assicurati che sia almeno 4 giorni dopo la prima
+            if (selectedDates.length === 1) {
+                const checkinDate = selectedDates[0];
+                const millisecondsInDay = 24 * 60 * 60 * 1000;
+                const minCheckoutDate = new Date(checkinDate.getTime() + 4 * millisecondsInDay);
+
+                if (date < minCheckoutDate) {
+                    alert('La data di check-out deve essere almeno 4 notti dopo il check-in.');
+                    return;
+                }
+            }
+
+            // Aggiungi la data
+            selectedDates.push(date);
+        }
+
+                } else {
+                    // Rimuovi la data
+                    selectedDates.splice(dateIndex, 1);
+                }
+                
+                // Ordina le date
+                selectedDates.sort((a, b) => a - b);
+                
+                // Aggiorna il calendario e le informazioni
+                updateCalendar();
+                updateSelectionInfo();
+            }
+            
+            // Funzione per aggiornare le informazioni sulla selezione
+            function updateSelectionInfo() {
+                if (selectedDates.length === 0) {
+                    selectedDatesElement.textContent = 'Nessuna data selezionata';
+                    nightsCountElement.textContent = '0';
+                    calculateButton.disabled = true;
+                } else {
+                    const formattedDates = selectedDates.map(date => formatDate(date)).join(' - ');
+                    selectedDatesElement.textContent = formattedDates;
+                    
+                    // Calcola il numero di notti
+                    if (selectedDates.length >= 2) {
+                        const startDate = selectedDates[0];
+                        const endDate = selectedDates[selectedDates.length - 1];
+                        // Il giorno di check-out non conta come notte, quindi sottraiamo 1 dal calcolo
+                        const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+                        nightsCountElement.textContent = nights;
+                        
+                        // Abilita il pulsante di calcolo se ci sono almeno minNights notti
+                        calculateButton.disabled = nights < minNights;
+                    } else {
+                        nightsCountElement.textContent = '0';
+                        calculateButton.disabled = true;
+                    }
+                }
+            }
+            
+            // Funzione per calcolare il preventivo
+            function calculateQuote() {
+                if (selectedDates.length < 2) {
+                    alert('Seleziona almeno due date.');
+                    return;
+                }
+                
+                const startDate = selectedDates[0];
+                const endDate = selectedDates[selectedDates.length - 1];
+                const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                if (nights < minNights) {
+                    resultElement.className = 'error';
+                    resultElement.style.display = 'block';
+                    resultElement.innerHTML = `Il soggiorno minimo è di ${minNights} notti. Hai selezionato ${nights} ${nights === 1 ? 'notte' : 'notti'}.`;
+                    return;
+                }
+                
+                // Crea un array di tutte le date di check-in (inclusa) fino alla data prima del check-out
+                // perché la notte del giorno di check-out non è conteggiata
+                let dates = [];
+                let currentDate = new Date(startDate);
+                
+                while (currentDate < endDate) {  // Nota: < invece di <= per escludere la data di check-out
+                    dates.push(new Date(currentDate));
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                // Verifica che tutte le date INTERNE siano prenotabili
+                // Escludiamo le verifiche sulle date di confine (check-in e check-out)
+                // perché queste date sono sempre prenotabili per la logica di check-in/check-out
+                let nonBookable = false;
+                
+                if (dates.length > 2) {
+                    // Verifica solo le date interne (escludendo la prima e l'ultima)
+                    nonBookable = dates.slice(1, -1).some(date => !isBookableDate(date));
+                }
+                
+                if (nonBookable) {
+                    resultElement.className = 'error';
+                    resultElement.style.display = 'block';
+                    resultElement.innerHTML = 'Alcune date selezionate non sono prenotabili. Riprova con un altro periodo.';
+                    return;
+                }
+                
+                // Calcola il prezzo per ogni notte
+                let nightlyPrices = dates.map(date => ({
+                    date: date,
+                    price: getDatePrice(date)
+                }));
+                
+                // Calcola il costo dei kit biancheria
+                const numKitMatrimoniale = parseInt(kitMatrimonialeInput.value) || 0;
+                const numKitSingolo = parseInt(kitSingoloInput.value) || 0;
+                const kitMatrimonialeCost = numKitMatrimoniale * kitMatrimonialePrice;
+                const kitSingoloCost = numKitSingolo * kitSingoloPrice;
+                const totalBiancheriaCost = kitMatrimonialeCost + kitSingoloCost;
+                
+                // Calcola il totale
+                const subtotal = nightlyPrices.reduce((sum, night) => sum + night.price, 0);
+                const total = subtotal + cleaningFee + totalBiancheriaCost;
+                
+                // Mostra il risultato
+                let html = `
+                    <div class="success">
+                        <p>Preventivo per il soggiorno dal ${formatDate(startDate)} al ${formatDate(endDate)} (${nights} notti):</p>
+                        
+                        <div class="price-breakdown">
+                `;
+                
+                // Aggiunge il dettaglio delle notti
+                nightlyPrices.forEach((night, index) => {
+                    html += `
+                        <div class="price-item">
+                            <span>Notte ${index + 1} (${formatDate(night.date)}):</span>
+                            <span>${night.price.toFixed(2)} €</span>
+                        </div>
+                    `;
+                });
+                
+                // Aggiunge pulizie, kit biancheria e totale
+                html += `
+                            <div class="price-item">
+                                <span>Spese di pulizia:</span>
+                                <span>${cleaningFee.toFixed(2)} €</span>
+                            </div>
+                `;
+                
+                // Aggiungi i kit biancheria se selezionati
+                if (numKitMatrimoniale > 0) {
+                    html += `
+                        <div class="price-item">
+                            <span>Kit Biancheria Matrimoniale (${numKitMatrimoniale}):</span>
+                            <span>${kitMatrimonialeCost.toFixed(2)} €</span>
+                        </div>
+                    `;
+                }
+                
+                if (numKitSingolo > 0) {
+                    html += `
+                        <div class="price-item">
+                            <span>Kit Biancheria Singolo (${numKitSingolo}):</span>
+                            <span>${kitSingoloCost.toFixed(2)} €</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                            <div class="price-item price-total">
+                                <span>Totale:</span>
+                                <span>${total.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultElement.className = 'success';
+                resultElement.style.display = 'block';
+                resultElement.innerHTML = html;
+            }
+            
+            // Inizializza il calendario
+            updateCalendar();
+            
+            // Aggiungi event listeners
+            monthSelect.addEventListener('change', updateCalendar);
+            calculateButton.addEventListener('click', calculateQuote);
+        });
+    </script>
+</body>
+</html>
+
