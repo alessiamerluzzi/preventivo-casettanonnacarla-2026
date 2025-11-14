@@ -647,10 +647,10 @@ function checkFormValidity() {
     // Controlla se i campi obbligatori sono compilati
     const hasRequiredFields = fullName !== '' && guests !== '' && period !== '';
     
-    // Controlla se il preventivo è stato calcolato CON SUCCESSO
-    const hasCalculatedQuote = resultElement && 
-                              resultElement.style.display !== 'none' && 
-                              resultElement.classList.contains('success');
+// Controlla se il preventivo è stato calcolato CON SUCCESSO (e se rispetta il vincolo sabato-sabato)
+const hasCalculatedQuote = resultElement && 
+                          resultElement.style.display !== 'none' && 
+                          resultElement.classList.contains('success');
     
     // Il form è valido solo se tutti i campi sono compilati E il preventivo è stato calcolato
     const isValid = hasRequiredFields && hasCalculatedQuote;
@@ -1048,6 +1048,11 @@ if (resultElement) {
                     year: 'numeric'
                 });
             }
+          
+          // Funzione per verificare se una data è un sabato
+function isSaturday(date) {
+    return date.getDay() === 6; // 6 = sabato
+}
             
             // Funzione per aggiornare il calendario
 function updateCalendar() {
@@ -1229,126 +1234,129 @@ const pricesNotAvailableEnd = new Date(2026, 9, 31);   // 31 ottobre 2026
                 }
             }
             
-            // Funzione per calcolare il preventivo
-            function calculateQuote() {
-                if (selectedDates.length < 2) {
-                    alert('Seleziona almeno due date.');
-                    return;
-                }
-                
-                const startDate = selectedDates[0];
-                const endDate = selectedDates[selectedDates.length - 1];
-                const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-                
-                if (nights < minNights) {
-                    resultElement.className = 'error';
-                    resultElement.style.display = 'block';
-                    resultElement.innerHTML = `Il soggiorno minimo è di ${minNights} notti. Hai selezionato ${nights} ${nights === 1 ? 'notte' : 'notti'}.`;
-                    return;
-                }
-                
-                // Crea un array di tutte le date di check-in (inclusa) fino alla data prima del check-out
-                // perché la notte del giorno di check-out non è conteggiata
-                let dates = [];
-                let currentDate = new Date(startDate);
-                
-                while (currentDate < endDate) {  // Nota: < invece di <= per escludere la data di check-out
-                    dates.push(new Date(currentDate));
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-                
-                // Verifica che tutte le date INTERNE siano prenotabili
-                // Escludiamo le verifiche sulle date di confine (check-in e check-out)
-                // perché queste date sono sempre prenotabili per la logica di check-in/check-out
-                let nonBookable = false;
-                
-                if (dates.length > 2) {
-                    // Verifica solo le date interne (escludendo la prima e l'ultima)
-                    nonBookable = dates.slice(1, -1).some(date => !isBookableDate(date));
-                }
-                
-                if (nonBookable) {
-                    resultElement.className = 'error';
-                    resultElement.style.display = 'block';
-                    resultElement.innerHTML = 'Alcune date selezionate non sono prenotabili. Riprova con un altro periodo.';
-                    return;
-                }
-                
-                // Calcola il prezzo per ogni notte
-                let nightlyPrices = dates.map(date => ({
-                    date: date,
-                    price: getDatePrice(date)
-                }));
-                
-                // Calcola il costo dei kit biancheria
-                const numKitMatrimoniale = parseInt(kitMatrimonialeInput.value) || 0;
-                const numKitSingolo = parseInt(kitSingoloInput.value) || 0;
-                const kitMatrimonialeCost = numKitMatrimoniale * kitMatrimonialePrice;
-                const kitSingoloCost = numKitSingolo * kitSingoloPrice;
-                const totalBiancheriaCost = kitMatrimonialeCost + kitSingoloCost;
-                
-                // Calcola il totale
-                const subtotal = nightlyPrices.reduce((sum, night) => sum + night.price, 0);
-                const total = subtotal + cleaningFee + totalBiancheriaCost;
-                
-                // Mostra il risultato
-                let html = `
-                    <div class="success">
-                        <p>Preventivo per il soggiorno dal ${formatDate(startDate)} al ${formatDate(endDate)} (${nights} notti):</p>
-                        
-                        <div class="price-breakdown">
-                `;
-                
-                // Aggiunge il dettaglio delle notti
-                nightlyPrices.forEach((night, index) => {
-                    html += `
-                        <div class="price-item">
-                            <span>Notte ${index + 1} (${formatDate(night.date)}):</span>
-                            <span>${night.price.toFixed(2)} €</span>
-                        </div>
-                    `;
-                });
-                
-                // Aggiunge pulizie, kit biancheria e totale
-                html += `
-                            <div class="price-item">
-                                <span>Spese di pulizia:</span>
-                                <span>${cleaningFee.toFixed(2)} €</span>
-                            </div>
-                `;
-                
-                // Aggiungi i kit biancheria se selezionati
-                if (numKitMatrimoniale > 0) {
-                    html += `
-                        <div class="price-item">
-                            <span>Kit Biancheria Matrimoniale (${numKitMatrimoniale}):</span>
-                            <span>${kitMatrimonialeCost.toFixed(2)} €</span>
-                        </div>
-                    `;
-                }
-                
-                if (numKitSingolo > 0) {
-                    html += `
-                        <div class="price-item">
-                            <span>Kit Biancheria Singolo (${numKitSingolo}):</span>
-                            <span>${kitSingoloCost.toFixed(2)} €</span>
-                        </div>
-                    `;
-                }
-                
-                html += `
-                            <div class="price-item price-total">
-                                <span>Totale:</span>
-                                <span>${total.toFixed(2)} €</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                resultElement.className = 'success';
-                resultElement.style.display = 'block';
-                resultElement.innerHTML = html;
-            }
+           // Funzione per calcolare il preventivo
+function calculateQuote() {
+    if (selectedDates.length < 2) {
+        alert('Seleziona almeno due date.');
+        return;
+    }
+    
+    const startDate = selectedDates[0];
+    const endDate = selectedDates[selectedDates.length - 1];
+    const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+    
+    // Verifica se check-in e check-out sono di sabato
+    const isCheckinSaturday = isSaturday(startDate);
+    const isCheckoutSaturday = isSaturday(endDate);
+    const isSaturdayToSaturday = isCheckinSaturday && isCheckoutSaturday;
+    
+    if (nights < minNights) {
+        resultElement.className = 'error';
+        resultElement.style.display = 'block';
+        resultElement.innerHTML = `Il soggiorno minimo è di ${minNights} notti. Hai selezionato ${nights} ${nights === 1 ? 'notte' : 'notti'}.`;
+        return;
+    }
+    
+    // Crea un array di tutte le date di check-in (inclusa) fino alla data prima del check-out
+    let dates = [];
+    let currentDate = new Date(startDate);
+    
+    while (currentDate < endDate) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Verifica che tutte le date INTERNE siano prenotabili
+    let nonBookable = false;
+    
+    if (dates.length > 2) {
+        nonBookable = dates.slice(1, -1).some(date => !isBookableDate(date));
+    }
+    
+    if (nonBookable) {
+        resultElement.className = 'error';
+        resultElement.style.display = 'block';
+        resultElement.innerHTML = 'Alcune date selezionate non sono prenotabili. Riprova con un altro periodo.';
+        return;
+    }
+    
+    // Calcola il prezzo per ogni notte
+    let nightlyPrices = dates.map(date => ({
+        date: date,
+        price: getDatePrice(date)
+    }));
+    
+    // Calcola il costo dei kit biancheria
+    const numKitMatrimoniale = parseInt(kitMatrimonialeInput.value) || 0;
+    const numKitSingolo = parseInt(kitSingoloInput.value) || 0;
+    const kitMatrimonialeCost = numKitMatrimoniale * kitMatrimonialePrice;
+    const kitSingoloCost = numKitSingolo * kitSingoloPrice;
+    const totalBiancheriaCost = kitMatrimonialeCost + kitSingoloCost;
+    
+    // Calcola il totale
+    const subtotal = nightlyPrices.reduce((sum, night) => sum + night.price, 0);
+    const total = subtotal + cleaningFee + totalBiancheriaCost;
+    
+    // Mostra il risultato
+    let html = `
+        <div class="${isSaturdayToSaturday ? 'success' : 'error'}">
+            <p>Preventivo per il soggiorno dal ${formatDate(startDate)} al ${formatDate(endDate)} (${nights} notti):</p>
+            
+            ${!isSaturdayToSaturday ? '<p style="font-weight: bold; color: #721c24; margin: 10px 0;">⚠️ Fino alle prenotazioni last minute, accettiamo solo soggiorni con check-in e check-out di sabato.</p>' : ''}
+            
+            <div class="price-breakdown">
+    `;
+    
+    // Aggiunge il dettaglio delle notti
+    nightlyPrices.forEach((night, index) => {
+        html += `
+            <div class="price-item">
+                <span>Notte ${index + 1} (${formatDate(night.date)}):</span>
+                <span>${night.price.toFixed(2)} €</span>
+            </div>
+        `;
+    });
+    
+    // Aggiunge pulizie, kit biancheria e totale
+    html += `
+                <div class="price-item">
+                    <span>Spese di pulizia:</span>
+                    <span>${cleaningFee.toFixed(2)} €</span>
+                </div>
+    `;
+    
+    // Aggiungi i kit biancheria se selezionati
+    if (numKitMatrimoniale > 0) {
+        html += `
+            <div class="price-item">
+                <span>Kit Biancheria Matrimoniale (${numKitMatrimoniale}):</span>
+                <span>${kitMatrimonialeCost.toFixed(2)} €</span>
+            </div>
+        `;
+    }
+    
+    if (numKitSingolo > 0) {
+        html += `
+            <div class="price-item">
+                <span>Kit Biancheria Singolo (${numKitSingolo}):</span>
+                <span>${kitSingoloCost.toFixed(2)} €</span>
+            </div>
+        `;
+    }
+    
+    html += `
+                <div class="price-item price-total">
+                    <span>Totale:</span>
+                    <span>${total.toFixed(2)} €</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultElement.className = isSaturdayToSaturday ? 'success' : 'error';
+    resultElement.style.display = 'block';
+    resultElement.innerHTML = html;
+}
             // Imposta automaticamente il mese corrente
             setCurrentMonth();
             // Inizializza il calendario
