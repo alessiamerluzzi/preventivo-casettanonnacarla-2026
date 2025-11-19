@@ -956,6 +956,7 @@ if (resultElement) {
            const nonBookableDates = [
                 { start: new Date(2025, 7, 22), end: new Date(2025, 8, 14) },   // 22 agosto-14 settembre
                 { start: new Date(2025, 8, 22), end: new Date(2025, 8, 28) }, // 22-28 settembre
+             { start: new Date(2026, 6, 18), end: new Date(2026, 6, 25) }, // 18-25 luglio 2026
                 // Aggiungi altri periodi non prenotabili secondo necessità
             ];
 
@@ -1131,8 +1132,7 @@ const pricesNotAvailableEnd = new Date(2026, 9, 31);   // 31 ottobre 2026
     dayElement.classList.add('offseason'); // Usa lo stesso stile visivo
    dayElement.addEventListener('click', () => {
     showCustomPopup(
-        'Prezzi non ancora disponibili',
-        '<p>I prezzi per questo periodo <strong>non sono ancora disponibili</strong>. Per permettervi di avere un\'idea <strong>assolutamente indicativa</strong> è possibile consultare i periodi corrispondenti nell\'anno precedente, tenendo però presente che <strong> gli importi saranno sicuramente diversi </strong> per la stagione 2026 a fronte di alcune migliorie che stiamo programmando.</p><p>Le informazioni verranno aggiornate fra <strong>dicembre 2025 e gennaio 2026</strong>: iscriviti alla nostra newsletter <a href="https://casettanonnacarla.substack.com/p/coming-soon?r=6d8m0d&utm_campaign=post&utm_medium=web&triedRedirect=true" target="_blank">per conoscere tutte le novità in anteprima</a>.</p>'
+        'Periodo già prenotato'
     );
 });
   
@@ -1404,5 +1404,4 @@ function setCurrentMonth() {
     </script>
 </body>
 </html>
-
 
