@@ -319,7 +319,7 @@
             <div class="calendar" id="calendar"></div>
         </div>
         
-       <p><small>Se il calendario non consente di selezionare una data, significa che <strong> la data è già stata prenotata </strong> e, dunque, <strong> non è più disponibile</strong>. <strong>Non si accettano prenotazioni di una durata inferiore a 4 notti.</strong></small> 
+        
            
         <div class="form-row">
             <label>Date selezionate: <span id="selected-dates">Nessuna data selezionata</span></label>
@@ -333,7 +333,7 @@
             <label>Notti: <span id="nights-count">0</span></label>
         </div>
         
-        <h2>Biancheria</h2>
+        
         <div class="info-box">
             La biancheria del letto e del bagno non è inclusa nel preventivo calcolato: può essere noleggiata o portata da casa. 
             Ogni kit include: 1 asciugamano grande e 2 piccoli, lenzuolo sotto, lenzuolo sopra e federe.  <p> <small>Per decidere di quali kit hai bisogno, visita <a href="https://sites.google.com/view/casettanonnacarla/galleria?authuser=0">il nostro sito e scopri come sono ripartiti i posti letto.</a></small>
@@ -341,17 +341,28 @@
         </div>
         
         <div class="options-section">
-            <div class="option-item">
-                <label for="kit-matrimoniale">Kit Matrimoniale:</label>
-                <input type="number" id="kit-matrimoniale" min="0" max="1" value="0">
-                <span class="option-price">25 € / kit</span>
-            </div>
-            <div class="option-item">
-                <label for="kit-singolo">Kit Singolo:</label>
-                <input type="number" id="kit-singolo" min="0" max="2" value="0">
-                <span class="option-price">20 € / kit</span>
-            </div>
-        </div>
+    <div class="option-item">
+        <label for="kit-matrimoniale">Kit Matrimoniale:</label>
+        <input type="number" id="kit-matrimoniale" min="0" max="1" value="0">
+        <span class="option-price">25 € / kit</span>
+    </div>
+    <div class="option-item">
+        <label for="kit-singolo">Kit Singolo:</label>
+        <input type="number" id="kit-singolo" min="0" max="2" value="0">
+        <span class="option-price">20 € / kit</span>
+    </div>
+</div>
+
+<div class="options-section">
+    <div class="option-item">
+        <label for="pets">Numero di animali:</label>
+        <select id="pets" style="width: auto; padding: 8px; margin-bottom: 0;">
+            <option value="0">0 - Nessun animale</option>
+            <option value="1">1 animale</option>
+            <option value="2">2 animali (+2€/notte)</option>
+        </select>
+    </div>
+</div>
         
         <button id="calculate-btn" disabled>Calcola Preventivo</button>
         
@@ -363,7 +374,7 @@
 </div>
  
 <!-- Modifica sezione contatti -->
-<h2>Contatti</h2>
+
 <div class="contact-section">
      <div class="form-hint warning">
         <p><strong>Attenzione!</strong> Compilare il form <strong>non corrisponde ad aver ultimato la prenotazione</strong>. Una volta inviata la richiesta di prenotazione, otterrai una risposta con il <a href="https://drive.google.com/file/d/1e5T2hVb833ETpgqkeeDqsRr-FJAtUexL/view?usp=drive_link">contratto di locazione transitoria a fini turistici</a> da firmare. Solo a quel punto la prenotazione potrà dirsi ultimata.</p>
@@ -380,12 +391,7 @@
             <input type="number" id="guests" name="guests" min="1" max="4" value="1" required>
             <div class="form-hint">Massimo 4 ospiti</div>
         </div>
-        
-        <div class="form-row">
-            <label for="pets">Animali domestici:</label>
-            <input type="number" id="pets" name="pets" min="0" max="2" value="0">
-            <div class="form-hint">Massimo 2 animali.  Per il secondo animale è richiesta una tariffa aggiuntiva di 2€ al giorno. <b>La tariffa non è calcolata nel prezzo del preventivo.</b></div>
-        </div>
+       
         
         <div class="form-row period-selection">
             <label for="period">Periodo del soggiorno: <span class="required">*</span></label>
@@ -748,61 +754,75 @@ if (!checkFormValidity()) {
 }
             
             // Raccogli i dati dal form
-            const fullName = document.getElementById('full-name').value;
-            const guests = document.getElementById('guests').value;
-            const pets = document.getElementById('pets').value;
-            const period = periodInput.value;
-            const other = document.getElementById('other').value;
+const fullName = document.getElementById('full-name').value;
+const guests = document.getElementById('guests').value;
+const period = periodInput.value;
+const other = document.getElementById('other').value;
+
+// Il numero di animali viene preso dal preventivo, non dal form
+const pets = document.getElementById('pets').value;
             
             // Ottieni il contenuto dettagliato del preventivo
-            let preventivoDettagliato = "Nessun preventivo calcolato";
-            const resultElement = document.getElementById('result');
-            
-            if (resultElement && resultElement.style.display !== 'none') {
-                // Inizia a costruire il preventivo dettagliato
-                let dettagliPreventivo = [];
+let preventivoDettagliato = "Nessun preventivo calcolato";
+const resultElement = document.getElementById('result');
+
+if (resultElement && resultElement.style.display !== 'none') {
+    // Inizia a costruire il preventivo dettagliato
+    let dettagliPreventivo = [];
+    
+    // Verifica se c'è un elemento di successo (che contiene il preventivo)
+    const successElement = resultElement.querySelector('.success');
+    if (successElement) {
+        // Estrai il periodo e il numero di notti
+        const periodoText = successElement.querySelector('p')?.textContent || '';
+        if (periodoText) {
+            dettagliPreventivo.push(periodoText);
+        }
+        
+        dettagliPreventivo.push(''); // Riga vuota per separazione
+        
+        // Estrai le singole notti dalla classe price-item (escludendo il totale)
+        const priceItems = resultElement.querySelectorAll('.price-item:not(.price-total)');
+        if (priceItems && priceItems.length > 0) {
+            priceItems.forEach(item => {
+                // Prendi tutto il testo dell'elemento e rimuovi spazi multipli e a capo
+                const fullText = item.textContent
+                    .replace(/\s+/g, ' ')  // Sostituisce spazi multipli con uno singolo
+                    .replace(/\n/g, ' ')   // Rimuove a capo
+                    .trim();               // Rimuove spazi iniziali e finali
                 
-                // Verifica se c'è un elemento di successo (che contiene il preventivo)
-                const successElement = resultElement.querySelector('.success');
-                if (successElement) {
-                    // Estrai il periodo e il numero di notti
-                    const periodoText = successElement.querySelector('p')?.textContent || '';
-                    if (periodoText) {
-                        dettagliPreventivo.push(periodoText);
-                    }
-                    
-                    // 1. Estrai le singole notti dalla classe price-item (escludendo il totale e altri elementi speciali)
-                    const priceItems = resultElement.querySelectorAll('.price-item:not(.price-total)');
-                    if (priceItems && priceItems.length > 0) {
-                        priceItems.forEach(item => {
-                            const itemText = item.textContent.trim().replace(/\s+/g, ' ');
-                            
-                            // Verifica se è un elemento di notte, spese pulizia o kit biancheria
-                            if (itemText.includes('Notte') || 
-                                itemText.includes('Spese di pulizia') || 
-                                itemText.includes('Kit Biancheria')) {
-                                dettagliPreventivo.push(itemText);
-                            }
-                        });
-                    }
-                    
-                    // Estrai il prezzo totale
-                    const priceTotalElement = resultElement.querySelector('.price-total');
-                    if (priceTotalElement) {
-                        dettagliPreventivo.push(priceTotalElement.textContent.trim().replace(/\s+/g, ' '));
-                    }
+                // Verifica se è un elemento di notte, spese pulizia o kit biancheria
+                if (fullText.includes('Notte') || 
+                    fullText.includes('Spese di pulizia') || 
+                    fullText.includes('Kit Biancheria')) {
+                    dettagliPreventivo.push(fullText);
                 }
-                
-                // Se abbiamo trovato dettagli, li usiamo; altrimenti facciamo fallback sul testo completo
-                if (dettagliPreventivo.length > 0) {
-                    preventivoDettagliato = dettagliPreventivo.join("%0D%0A");
-                } else {
-                    // Fallback: prendi tutto il contenuto testuale del preventivo
-                    preventivoDettagliato = "Preventivo:%0D%0A" + resultElement.textContent.trim()
-                        .replace(/\s+/g, ' ')
-                        .split('.').join("%0D%0A");
-                }
-            }
+            });
+        }
+        
+        dettagliPreventivo.push(''); // Riga vuota prima del totale
+        
+        // Estrai il prezzo totale
+        const priceTotalElement = resultElement.querySelector('.price-total');
+        if (priceTotalElement) {
+            const totalText = priceTotalElement.textContent
+                .replace(/\s+/g, ' ')
+                .replace(/\n/g, ' ')
+                .trim();
+            dettagliPreventivo.push(totalText);
+        }
+    }
+    
+    // Se abbiamo trovato dettagli, li usiamo
+    if (dettagliPreventivo.length > 0) {
+        preventivoDettagliato = dettagliPreventivo.join("%0D%0A");
+    } else {
+        // Fallback
+        preventivoDettagliato = "Preventivo:%0D%0A" + resultElement.textContent.trim()
+            .replace(/\s+/g, ' ')
+            .split('.').join("%0D%0A");
+    }
+}
             
             // Prepara i dati per l'email con il preventivo dettagliato
             const mailtoLink = `mailto:merluzzialessia@gmail.com?subject=Richiesta Prenotazione Casa Vacanze&body=Nome e Cognome: ${encodeURIComponent(fullName)}%0D%0ANumero di ospiti: ${encodeURIComponent(guests)}%0D%0AAnimali domestici: ${encodeURIComponent(pets)}%0D%0APeriodo del soggiorno: ${encodeURIComponent(period)}%0D%0A%0D%0APREVENTIVO DETTAGLIATO:%0D%0A${preventivoDettagliato}%0D%0A%0D%0AAltro: ${encodeURIComponent(other)}`;
@@ -854,7 +874,7 @@ setTimeout(function() {
             ">
                 <h1 style="color: #2c3e50; margin-bottom: 20px;">Stai inviando la tua richiesta!</h1>
                 <p style="font-size: 18px; color: #2c3e50; line-height: 1.6;">
-                    Grazie di aver scelto la nostra casetta! Si aprirà il tuo client email per completare l'invio.
+                    Grazie di aver scelto la nostra casetta! Si aprirà il tuo client email per completare l'invio. Mi raccomando, non scordare di inviare la mail dal tuo client, che si aprirà in automatico. Diversamente, non riceveremo la tua richiesta di prenotazione. 
                 </p>
                 ${additionalMessage}
             </div>
@@ -871,11 +891,7 @@ setTimeout(function() {
             checkFormValidity();
         });
         
-        const petsInput = document.getElementById('pets');
-        petsInput.addEventListener('change', function() {
-            if (this.value < 0) this.value = 0;
-            if (this.value > 2) this.value = 2;
-        });
+      
         
         // Migliora la sincronizzazione con il calendario principale
         const selectedDatesElement = document.getElementById('selected-dates');
@@ -965,9 +981,29 @@ if (resultElement) {
 
 
             const cleaningFee = 80;
-            const minNights = 4;
+const extraPetFeePerNight = 2;
+const minNightsDefault = 7;
+const minNightsFlexible = 4;
             const kitMatrimonialePrice = 25;
             const kitSingoloPrice = 20;
+          
+          // Definisci i periodi flessibili (minimo 4 notti, senza vincolo sabato-sabato)
+const flexiblePeriods = [
+    { start: new Date(2026, 4, 1), end: new Date(2026, 4, 30) },    // 1-30 maggio 2026
+    { start: new Date(2026, 8, 12), end: new Date(2026, 9, 31) }    // 12 settembre - 31 ottobre 2026
+];
+
+// Funzione per verificare se una data è in un periodo flessibile
+function isInFlexiblePeriod(date) {
+    return flexiblePeriods.some(period => 
+        date >= period.start && date <= period.end
+    );
+}
+
+// Funzione per verificare se entrambe le date sono in periodo flessibile
+function areBothDatesInFlexiblePeriod(startDate, endDate) {
+    return isInFlexiblePeriod(startDate) && isInFlexiblePeriod(endDate);
+}
             
             let selectedDates = [];
             const calendarElement = document.getElementById('calendar');
@@ -1181,17 +1217,20 @@ const pricesNotAvailableEnd = new Date(2026, 9, 31);   // 31 ottobre 2026
                         selectedDates.push(date);
                         
                            } else {
-            // Selezione della seconda data: assicurati che sia almeno 4 giorni dopo la prima
-            if (selectedDates.length === 1) {
-                const checkinDate = selectedDates[0];
-                const millisecondsInDay = 24 * 60 * 60 * 1000;
-                const minCheckoutDate = new Date(checkinDate.getTime() + 4 * millisecondsInDay);
+    // Selezione della seconda data: verifica il minimo di notti
+    if (selectedDates.length === 1) {
+        const checkinDate = selectedDates[0];
+        const millisecondsInDay = 24 * 60 * 60 * 1000;
+        
+        // Determina il minimo di notti in base al periodo
+        const minNights = areBothDatesInFlexiblePeriod(checkinDate, date) ? minNightsFlexible : minNightsDefault;
+        const minCheckoutDate = new Date(checkinDate.getTime() + minNights * millisecondsInDay);
 
-                if (date < minCheckoutDate) {
-                    alert('La data di check-out deve essere almeno 4 notti dopo il check-in.');
-                    return;
-                }
-            }
+        if (date < minCheckoutDate) {
+            alert(`La data di check-out deve essere almeno ${minNights} notti dopo il check-in.`);
+            return;
+        }
+    }
 
             // Aggiungi la data
             selectedDates.push(date);
@@ -1211,31 +1250,33 @@ const pricesNotAvailableEnd = new Date(2026, 9, 31);   // 31 ottobre 2026
             }
             
             // Funzione per aggiornare le informazioni sulla selezione
-            function updateSelectionInfo() {
-                if (selectedDates.length === 0) {
-                    selectedDatesElement.textContent = 'Nessuna data selezionata';
-                    nightsCountElement.textContent = '0';
-                    calculateButton.disabled = true;
-                } else {
-                    const formattedDates = selectedDates.map(date => formatDate(date)).join(' - ');
-                    selectedDatesElement.textContent = formattedDates;
-                    
-                    // Calcola il numero di notti
-                    if (selectedDates.length >= 2) {
-                        const startDate = selectedDates[0];
-                        const endDate = selectedDates[selectedDates.length - 1];
-                        // Il giorno di check-out non conta come notte, quindi sottraiamo 1 dal calcolo
-                        const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-                        nightsCountElement.textContent = nights;
-                        
-                        // Abilita il pulsante di calcolo se ci sono almeno minNights notti
-                        calculateButton.disabled = nights < minNights;
-                    } else {
-                        nightsCountElement.textContent = '0';
-                        calculateButton.disabled = true;
-                    }
-                }
-            }
+function updateSelectionInfo() {
+    if (selectedDates.length === 0) {
+        selectedDatesElement.textContent = 'Nessuna data selezionata';
+        nightsCountElement.textContent = '0';
+        calculateButton.disabled = true;
+    } else {
+        const formattedDates = selectedDates.map(date => formatDate(date)).join(' - ');
+        selectedDatesElement.textContent = formattedDates;
+        
+        // Calcola il numero di notti
+        if (selectedDates.length >= 2) {
+            const startDate = selectedDates[0];
+            const endDate = selectedDates[selectedDates.length - 1];
+            const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+            nightsCountElement.textContent = nights;
+            
+            // Determina il minimo di notti in base al periodo
+            const minNights = areBothDatesInFlexiblePeriod(startDate, endDate) ? minNightsFlexible : minNightsDefault;
+            
+            // Abilita il pulsante di calcolo se ci sono almeno minNights notti
+            calculateButton.disabled = nights < minNights;
+        } else {
+            nightsCountElement.textContent = '0';
+            calculateButton.disabled = true;
+        }
+    }
+}
             
            // Funzione per calcolare il preventivo
 function calculateQuote() {
@@ -1248,17 +1289,24 @@ function calculateQuote() {
     const endDate = selectedDates[selectedDates.length - 1];
     const nights = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
     
-    // Verifica se check-in e check-out sono di sabato
-    const isCheckinSaturday = isSaturday(startDate);
-    const isCheckoutSaturday = isSaturday(endDate);
-    const isSaturdayToSaturday = isCheckinSaturday && isCheckoutSaturday;
-    
-    if (nights < minNights) {
-        resultElement.className = 'error';
-        resultElement.style.display = 'block';
-        resultElement.innerHTML = `Il soggiorno minimo è di ${minNights} notti. Hai selezionato ${nights} ${nights === 1 ? 'notte' : 'notti'}.`;
-        return;
-    }
+   // Determina se siamo in periodo flessibile
+const isFlexiblePeriod = areBothDatesInFlexiblePeriod(startDate, endDate);
+const minNights = isFlexiblePeriod ? minNightsFlexible : minNightsDefault;
+
+// Verifica se check-in e check-out sono di sabato
+const isCheckinSaturday = isSaturday(startDate);
+const isCheckoutSaturday = isSaturday(endDate);
+const isSaturdayToSaturday = isCheckinSaturday && isCheckoutSaturday;
+
+// Nel periodo flessibile non serve il vincolo sabato-sabato
+const meetsRequirements = isFlexiblePeriod || isSaturdayToSaturday;
+
+if (nights < minNights) {
+    resultElement.className = 'error';
+    resultElement.style.display = 'block';
+    resultElement.innerHTML = `Il soggiorno minimo è di ${minNights} notti. Hai selezionato ${nights} ${nights === 1 ? 'notte' : 'notti'}.`;
+    return;
+}
     
     // Crea un array di tutte le date di check-in (inclusa) fino alla data prima del check-out
     let dates = [];
@@ -1290,22 +1338,26 @@ function calculateQuote() {
     }));
     
     // Calcola il costo dei kit biancheria
-    const numKitMatrimoniale = parseInt(kitMatrimonialeInput.value) || 0;
-    const numKitSingolo = parseInt(kitSingoloInput.value) || 0;
-    const kitMatrimonialeCost = numKitMatrimoniale * kitMatrimonialePrice;
-    const kitSingoloCost = numKitSingolo * kitSingoloPrice;
-    const totalBiancheriaCost = kitMatrimonialeCost + kitSingoloCost;
-    
-    // Calcola il totale
-    const subtotal = nightlyPrices.reduce((sum, night) => sum + night.price, 0);
-    const total = subtotal + cleaningFee + totalBiancheriaCost;
+const numKitMatrimoniale = parseInt(kitMatrimonialeInput.value) || 0;
+const numKitSingolo = parseInt(kitSingoloInput.value) || 0;
+const kitMatrimonialeCost = numKitMatrimoniale * kitMatrimonialePrice;
+const kitSingoloCost = numKitSingolo * kitSingoloPrice;
+const totalBiancheriaCost = kitMatrimonialeCost + kitSingoloCost;
+
+// Calcola il costo extra per animali (solo se ci sono 2 animali)
+const numPets = parseInt(document.getElementById('pets').value) || 0;
+const extraPetCost = (numPets === 2) ? (extraPetFeePerNight * nights) : 0;
+
+// Calcola il totale
+const subtotal = nightlyPrices.reduce((sum, night) => sum + night.price, 0);
+const total = subtotal + cleaningFee + totalBiancheriaCost + extraPetCost;
     
     // Mostra il risultato
     let html = `
         <div class="${isSaturdayToSaturday ? 'success' : 'error'}">
             <p>Preventivo per il soggiorno dal ${formatDate(startDate)} al ${formatDate(endDate)} (${nights} notti):</p>
             
-            ${!isSaturdayToSaturday ? '<p style="font-weight: bold; color: #721c24; margin: 10px 0;">⚠️ Fino alle prenotazioni last minute, accettiamo solo soggiorni con check-in e check-out di sabato.</p>' : ''}
+${!meetsRequirements ? '<p style="font-weight: bold; color: #721c24; margin: 10px 0;">⚠️ In questo periodo accettiamo solo soggiorni con check-in e check-out di sabato e minimo 7 notti.</p>' : ''}
             
             <div class="price-breakdown">
     `;
@@ -1329,34 +1381,44 @@ function calculateQuote() {
     `;
     
     // Aggiungi i kit biancheria se selezionati
-    if (numKitMatrimoniale > 0) {
-        html += `
-            <div class="price-item">
-                <span>Kit Biancheria Matrimoniale (${numKitMatrimoniale}):</span>
-                <span>${kitMatrimonialeCost.toFixed(2)} €</span>
-            </div>
-        `;
-    }
-    
-    if (numKitSingolo > 0) {
-        html += `
-            <div class="price-item">
-                <span>Kit Biancheria Singolo (${numKitSingolo}):</span>
-                <span>${kitSingoloCost.toFixed(2)} €</span>
-            </div>
-        `;
-    }
-    
+if (numKitMatrimoniale > 0) {
     html += `
-                <div class="price-item price-total">
-                    <span>Totale:</span>
-                    <span>${total.toFixed(2)} €</span>
-                </div>
-            </div>
+        <div class="price-item">
+            <span>Kit Biancheria Matrimoniale (${numKitMatrimoniale}):</span>
+            <span>${kitMatrimonialeCost.toFixed(2)} €</span>
         </div>
     `;
+}
+
+if (numKitSingolo > 0) {
+    html += `
+        <div class="price-item">
+            <span>Kit Biancheria Singolo (${numKitSingolo}):</span>
+            <span>${kitSingoloCost.toFixed(2)} €</span>
+        </div>
+    `;
+}
+
+// Aggiungi il costo extra per animali se applicabile
+if (extraPetCost > 0) {
+    html += `
+        <div class="price-item">
+            <span>Extra Animali Domestici (${nights} notti x ${extraPetFeePerNight}€):</span>
+            <span>${extraPetCost.toFixed(2)} €</span>
+        </div>
+    `;
+}
+
+html += `
+            <div class="price-item price-total">
+                <span>Totale:</span>
+                <span>${total.toFixed(2)} €</span>
+            </div>
+        </div>
+    </div>
+`;
     
-    resultElement.className = isSaturdayToSaturday ? 'success' : 'error';
+    resultElement.className = meetsRequirements ? 'success' : 'error';
     resultElement.style.display = 'block';
     resultElement.innerHTML = html;
 }
@@ -1407,7 +1469,6 @@ function setCurrentMonth() {
     </script>
 </body>
 </html>
-
 
 
 
